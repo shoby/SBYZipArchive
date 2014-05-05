@@ -63,7 +63,7 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
     unzOpenCurrentFile(self.unzFile);
     
     NSMutableData *data = [[NSMutableData alloc] initWithLength:entry.size];
-    unzReadCurrentFile(self.unzFile, [data mutableBytes], data.length);
+    unzReadCurrentFile(self.unzFile, [data mutableBytes], (unsigned int)data.length);
     
     unzCloseCurrentFile(self.unzFile);
     
