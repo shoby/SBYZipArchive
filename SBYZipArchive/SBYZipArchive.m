@@ -54,6 +54,10 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
 
 - (NSData *)dataForEntry:(SBYZipEntry *)entry
 {
+    if (!entry) {
+        return nil;
+    }
+    
     // start lock
     dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC);
     dispatch_semaphore_wait(self.semaphore, timeout);
