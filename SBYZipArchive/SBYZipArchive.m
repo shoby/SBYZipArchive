@@ -21,11 +21,11 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
 
 @implementation SBYZipArchive
 
-- (id)initWithContentsOfFile:(NSString *)path error:(NSError **)error
+- (id)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error
 {
     self = [super init];
     if (self) {
-        self.unzFile = unzOpen([path UTF8String]);
+        self.unzFile = unzOpen([url.path UTF8String]);
         if (!self.unzFile) {
             if (error) {
                 NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Cannot open the archive file."};

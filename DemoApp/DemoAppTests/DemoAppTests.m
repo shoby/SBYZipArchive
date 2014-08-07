@@ -26,9 +26,9 @@
 
 - (void)testUnarchive
 {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"images" ofType:@"zip"];
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"images" withExtension:@"zip"];
     NSError *openError = nil;
-    SBYZipArchive *archive = [[SBYZipArchive alloc] initWithContentsOfFile:path error:&openError];
+    SBYZipArchive *archive = [[SBYZipArchive alloc] initWithContentsOfURL:url error:&openError];
     if (openError) {
         XCTFail(@"%@", openError);
     }

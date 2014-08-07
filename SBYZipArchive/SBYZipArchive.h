@@ -12,7 +12,7 @@
 @interface SBYZipArchive : NSObject
 @property (readonly) NSArray *entries;
 
-- (id)initWithContentsOfFile:(NSString *)path error:(NSError **)error;
+- (id)initWithContentsOfURL:(NSURL *)url error:(NSError **)error;
 
 - (BOOL)loadEntries:(NSError **)error;
 
