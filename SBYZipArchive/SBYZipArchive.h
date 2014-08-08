@@ -14,20 +14,18 @@
 @interface SBYZipArchive : NSObject
 @property (strong, nonatomic, readonly) NSURL *url;
 @property (readonly) NSArray *entries;
-@property (weak, nonatomic) id<SBYZipArchiveDelegate> delegate;
 
-- (id)initWithContentsOfURL:(NSURL *)url error:(NSError **)error;
+- (id)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error;
 
-- (BOOL)loadEntries:(NSError **)error;
+- (BOOL)loadEntriesWithError:(NSError *__autoreleasing *)error;
 
-- (NSData *)dataForEntry:(SBYZipEntry *)entry;
-- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url;
-@end
+- (NSData *)dataForEntry:(SBYZipEntry *)entry error:(NSError *__autoreleasing *)error;
 
-
-@protocol SBYZipArchiveDelegate <NSObject>
-- (void)zipArchive:(SBYZipArchive *)archive didUnzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url;
-- (void)zipArchive:(SBYZipArchive *)archive didFailToUnzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url error:(NSError *)error;
+- (void)unzipEntry:(SBYZipEntry *)entry
+             toURL:(NSURL *)url
+           success:(void (^)(NSURL *unzippedFileLocation))success
+           failure:(void (^)(NSError *error))failure
+          progress:(void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
 @end
 
 

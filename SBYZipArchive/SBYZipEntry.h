@@ -12,16 +12,22 @@
 
 @interface SBYZipEntry : NSObject
 @property (weak, nonatomic, readonly)   SBYZipArchive *archive;
-@property (copy, nonatomic, readonly)   NSString *fileName;
-@property (assign, nonatomic, readonly) NSUInteger size;
+@property (copy, nonatomic, readonly)   NSString  *fileName;
+@property (assign, nonatomic, readonly) NSUInteger fileSize;
 @property (assign, nonatomic, readonly) NSUInteger offset;
-@property (readonly) NSData *data;
 
 - (id)initWithArchive:(SBYZipArchive *)archive
              fileName:(NSString *)fileName
-                 size:(NSUInteger)size
+             fileSize:(NSUInteger)fileSize
                offset:(NSUInteger)offset;
 
-- (void)unzipToURL:(NSURL *)url;
+// To unzip small file synchronously
+- (NSData *)dataWithError:(NSError *__autoreleasing *)error;
+
+// To unzip large file asynchronously
+- (void)unzipToURL:(NSURL *)url
+           success:(void (^)(NSURL *unzippedFileLocation))success
+           failure:(void (^)(NSError *error))failure
+          progress:(void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
 
 @end

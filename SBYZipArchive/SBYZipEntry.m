@@ -12,32 +12,35 @@
 @interface SBYZipEntry ()
 @property (weak, nonatomic, readwrite)   SBYZipArchive *archive;
 @property (copy, nonatomic, readwrite)   NSString *fileName;
-@property (assign, nonatomic, readwrite) NSUInteger size;
+@property (assign, nonatomic, readwrite) NSUInteger fileSize;
 @property (assign, nonatomic, readwrite) NSUInteger offset;
 @end
 
 @implementation SBYZipEntry
 
-- (id)initWithArchive:(SBYZipArchive *)archive fileName:(NSString *)fileName size:(NSUInteger)size offset:(NSUInteger)offset
+- (id)initWithArchive:(SBYZipArchive *)archive
+             fileName:(NSString *)fileName
+             fileSize:(NSUInteger)fileSize
+               offset:(NSUInteger)offset
 {
     self = [super init];
     if (self) {
-        self.archive  = archive;
-        self.fileName = fileName;
-        self.size     = size;
-        self.offset   = offset;
+        self.archive            = archive;
+        self.fileName           = fileName;
+        self.fileSize           = fileSize;
+        self.offset             = offset;
     }
     return self;
 }
 
-- (NSData *)data
+- (NSData *)dataWithError:(NSError *__autoreleasing *)error
 {
-    return [self.archive dataForEntry:self];
+    return [self.archive dataForEntry:self error:error];
 }
 
-- (void)unzipToURL:(NSURL *)url
+- (void)unzipToURL:(NSURL *)url success:(void (^)(NSURL *))success failure:(void (^)(NSError *))failure progress:(void (^)(NSUInteger, NSUInteger))progress
 {
-    [self.archive unzipEntry:self toURL:url];
+    [self.archive unzipEntry:self toURL:url success:success failure:failure progress:progress];
 }
 
 @end
