@@ -24,7 +24,7 @@
     [super tearDown];
 }
 
-- (void)testUnarchive
+- (void)testUnzip
 {
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"images" withExtension:@"zip"];
     NSError *openError = nil;
