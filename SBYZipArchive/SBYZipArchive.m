@@ -11,10 +11,15 @@
 
 NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
 
-@interface SBYZipArchive ()
+static const NSUInteger SBYZipArchiveBufferSize = 4096;
+
+@interface SBYZipArchive () <NSStreamDelegate>
 @property (assign, nonatomic) unzFile unzFile;
 @property (strong, nonatomic) NSMutableArray *cachedEntries;
 @property (strong, nonatomic) dispatch_semaphore_t semaphore;
+@property (strong, nonatomic) NSOutputStream *outputStream;
+@property (strong, nonatomic) SBYZipEntry *unzipEntry;
+@property (strong, nonatomic) NSURL *unzipURL;
 
 - (NSString *)localizedDescriptionForUnzError:(int)unzError;
 @end
@@ -127,6 +132,128 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
     }
     
     return localizedDescription;
+}
+
+- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url
+{
+    if (!entry) {
+        return;
+    }
+    
+    NSURL *fullPath = [url URLByAppendingPathComponent:entry.fileName];
+    
+    NSFileManager *fileManger = [[NSFileManager alloc] init];
+    
+    if ([fileManger fileExistsAtPath:fullPath.path]) {
+        if (self.delegate) {
+            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Cannot unzip the entry file. File already exits."};
+            
+            NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
+            
+            [self.delegate zipArchive:self didFailToUnzipEntry:entry toURL:url error:error];
+        }
+        
+        return;
+    }
+    
+    if (![fileManger fileExistsAtPath:[fullPath.path stringByDeletingLastPathComponent]]) {
+        NSError *error = nil;
+        [fileManger createDirectoryAtPath:[fullPath.path stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:&error];
+        
+        if (error) {
+            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Failed to create directory."};
+            NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
+            
+            [self.delegate zipArchive:self didFailToUnzipEntry:entry toURL:url error:error];
+            
+            return;
+        }
+    }
+    
+    // start lock
+    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC);
+    dispatch_semaphore_wait(self.semaphore, timeout);
+    
+    unzSetOffset(self.unzFile, entry.offset);
+    unzOpenCurrentFile(self.unzFile);
+    
+    self.unzipEntry = entry;
+    self.unzipURL = url;
+    
+    self.outputStream = [[NSOutputStream alloc] initWithURL:fullPath append:YES];
+    self.outputStream.delegate = self;
+    [self.outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    
+    [self.outputStream open];
+    
+    // end lock
+    dispatch_semaphore_signal(self.semaphore);
+}
+
+- (void)closeStream:(NSStream *)stream
+{
+    [stream close];
+    [stream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    self.outputStream = nil;
+}
+
+#pragma mark - NSStreamDelegate
+
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
+{
+    switch (eventCode) {
+        case NSStreamEventHasSpaceAvailable:
+        {
+            NSMutableData *buffer = [[NSMutableData alloc] initWithLength:SBYZipArchiveBufferSize];
+            int readBytes = unzReadCurrentFile(self.unzFile, [buffer mutableBytes], (unsigned int)buffer.length);
+            
+            if (readBytes == 0) { // completed
+                if (self.delegate) {
+                    [self.delegate zipArchive:self didUnzipEntry:self.unzipEntry toURL:self.unzipURL];
+                }
+                
+                [self closeStream:stream];
+            } else if (readBytes < 0) { // error
+                int unz_err = readBytes;
+                NSString *localizedDescription = [self localizedDescriptionForUnzError:unz_err];
+                NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:@{NSLocalizedDescriptionKey: localizedDescription}];
+                
+                if (self.delegate) {
+                    [self.delegate zipArchive:self didFailToUnzipEntry:self.unzipEntry toURL:self.unzipURL error:error];
+                }
+                
+                [self closeStream:stream];
+            } else {
+                [(NSOutputStream *)stream write:[buffer bytes] maxLength:readBytes];
+            }
+            
+            break;
+        }
+        case NSStreamEventErrorOccurred:
+        {
+            if (self.delegate) {
+                NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Failed to unzip the entry file."};
+                
+                NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
+                
+                if (self.delegate) {
+                    [self.delegate zipArchive:self didFailToUnzipEntry:self.unzipEntry toURL:self.unzipURL error:error];
+                }
+            }
+            
+            [self closeStream:stream];
+        }
+        case NSStreamEventEndEncountered:
+        {
+            if (self.delegate) {
+                [self.delegate zipArchive:self didUnzipEntry:self.unzipEntry toURL:self.unzipURL];
+            }
+            
+            [self closeStream:stream];
+        }
+        default:
+            break;
+    }
 }
 
 @end

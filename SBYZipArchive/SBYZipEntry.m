@@ -35,4 +35,9 @@
     return [self.archive dataForEntry:self];
 }
 
+- (void)unzipToURL:(NSURL *)url
+{
+    [self.archive unzipEntry:self toURL:url];
+}
+
 @end

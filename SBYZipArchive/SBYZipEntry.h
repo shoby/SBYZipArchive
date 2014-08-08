@@ -21,4 +21,7 @@
              fileName:(NSString *)fileName
                  size:(NSUInteger)size
                offset:(NSUInteger)offset;
+
+- (void)unzipToURL:(NSURL *)url;
+
 @end
