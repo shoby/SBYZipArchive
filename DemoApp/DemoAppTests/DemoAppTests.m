@@ -34,7 +34,7 @@
     }
     
     NSError *loadError = nil;
-    [archive loadEntries:&loadError];
+    [archive loadEntriesWithError:&loadError];
     if (loadError) {
         XCTFail(@"%@", loadError);
     }
@@ -44,7 +44,7 @@
     SBYZipEntry *entry = [filterdEntries firstObject];
     
     XCTAssertEqualObjects(@"images/cat.jpg", entry.fileName, @"Unexpected fileName.");
-    XCTAssertEqual(2125938, entry.size, @"Unexpected size.");
+    XCTAssertEqual(2125938, entry.fileSize, @"Unexpected size.");
     XCTAssertEqual(6838243, entry.offset, @"Unexpected offset.");
 }
 
