@@ -11,7 +11,8 @@
 #import "SBYZipEntry.h"
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet UIImageView *imageView;
+@property (weak, nonatomic) IBOutlet UIImageView *imageView01;
+@property (weak, nonatomic) IBOutlet UIImageView *imageView02;
 
 @property (strong, nonatomic) SBYZipArchive *archive;
 
@@ -26,7 +27,8 @@
     
     [self setUpArchive];
     
-    [self setImageByPartialMatching];
+    [self unzipImageSynchronously];
+    [self unzipImageAsynchronously];
 }
 
 - (void)setUpArchive
@@ -42,21 +44,47 @@
     self.archive = archive;
     
     NSError *loadError = nil;
-    [self.archive loadEntries:&loadError];
+    [self.archive loadEntriesWithError:&loadError];
     if (loadError) {
         NSLog(@"%@", loadError);
         return;
     }
 }
 
-- (void)setImageByPartialMatching
+- (void)unzipImageSynchronously
 {
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fileName like %@", @"*cat*"];
     NSArray *filterdEntries = [self.archive.entries filteredArrayUsingPredicate:predicate];
     SBYZipEntry *entry = [filterdEntries firstObject];
     
-    UIImage *image = [[UIImage alloc] initWithData:entry.data scale:[[UIScreen mainScreen] scale]];
-    self.imageView.image = image;
+    NSData *data = [entry dataWithError:nil];
+    UIImage *image = [[UIImage alloc] initWithData:data scale:[[UIScreen mainScreen] scale]];
+    self.imageView01.image = image;
+}
+
+
+- (void)unzipImageAsynchronously
+{
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"fileName like %@", @"*dog*"];
+    NSArray *filterdEntries = [self.archive.entries filteredArrayUsingPredicate:predicate];
+    SBYZipEntry *entry = [filterdEntries firstObject];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    NSArray *URLs = [fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask];
+    NSURL *documentsDirectory = [URLs objectAtIndex:0];
+    
+    [fileManager removeItemAtURL:[documentsDirectory URLByAppendingPathComponent:entry.fileName] error:nil];
+    
+    [entry unzipToURL:documentsDirectory success:^(NSURL *unzippedFileLocation) {
+        NSData *data = [NSData dataWithContentsOfURL:unzippedFileLocation];
+        UIImage *image = [[UIImage alloc] initWithData:data scale:[[UIScreen mainScreen] scale]];
+        self.imageView02.image = image;
+    } failure:^(NSError *error) {
+        NSLog(@"%@", error);
+    } progress:^(NSUInteger bytesUnzipped, NSUInteger totalBytes) {
+        NSLog(@"progress:%f", (double)bytesUnzipped/totalBytes);
+    }];
 }
 
 @end
