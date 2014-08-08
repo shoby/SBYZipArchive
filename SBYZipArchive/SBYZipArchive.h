@@ -12,6 +12,7 @@
 @protocol SBYZipArchiveDelegate;
 
 @interface SBYZipArchive : NSObject
+@property (strong, nonatomic, readonly) NSURL *url;
 @property (readonly) NSArray *entries;
 @property (weak, nonatomic) id<SBYZipArchiveDelegate> delegate;
 

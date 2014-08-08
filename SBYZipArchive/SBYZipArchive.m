@@ -14,6 +14,7 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
 static const NSUInteger SBYZipArchiveBufferSize = 4096;
 
 @interface SBYZipArchive () <NSStreamDelegate>
+@property (strong, nonatomic, readwrite) NSURL *url;
 @property (assign, nonatomic) unzFile unzFile;
 @property (strong, nonatomic) NSMutableArray *cachedEntries;
 @property (strong, nonatomic) dispatch_semaphore_t semaphore;
@@ -30,6 +31,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 {
     self = [super init];
     if (self) {
+        self.url = url;
         self.unzFile = unzOpen([url.path UTF8String]);
         if (!self.unzFile) {
             if (error) {
