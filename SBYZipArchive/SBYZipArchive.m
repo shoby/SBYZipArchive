@@ -148,7 +148,13 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
         NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
         
         if (failure) {
-            failure(error);
+            if ([NSThread isMainThread]) {
+                failure(error);
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    failure(error);
+                });
+            }
         }
         return;
     }
@@ -162,7 +168,13 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
             NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
             
             if (failure) {
-                failure(error);
+                if ([NSThread isMainThread]) {
+                    failure(error);
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        failure(error);
+                    });
+                }
             }
             
             return;
@@ -184,22 +196,29 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
     unzSetOffset(self.unzFile, entry.offset);
     unzOpenCurrentFile(self.unzFile);
     
-    self.outputStream = [[NSOutputStream alloc] initWithURL:fullPath append:YES];
-    self.outputStream.delegate = self;
-    [self.outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-    
-    [self.outputStream open];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.outputStream = [[NSOutputStream alloc] initWithURL:fullPath append:YES];
+        self.outputStream.delegate = self;
+        [self.outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        
+        [self.outputStream open];
+        
+        [[NSRunLoop currentRunLoop] run];
+    });
 }
 
 - (void)closeStream:(NSStream *)stream
 {
     [stream close];
     [stream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    self.outputStream = nil;
     
     // end lock
     dispatch_semaphore_signal(self.semaphore);
-    
-    self.outputStream = nil;
+}
+
+- (void)releaseBlocks
+{
     self.progressBlock = nil;
     self.successBlock = nil;
     self.failureBlock = nil;
@@ -216,27 +235,20 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
             int readBytes = unzReadCurrentFile(self.unzFile, [buffer mutableBytes], (unsigned int)buffer.length);
             
             if (readBytes == 0) { // completed
-                if (self.successBlock) {
-                    self.successBlock(self.unzipDestinationURL);
-                }
+                [self callSuccessBlock];
                 [self closeStream:stream];
             } else if (readBytes < 0) { // error
                 int unz_err = readBytes;
                 NSString *localizedDescription = [self localizedDescriptionForUnzError:unz_err];
                 NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:@{NSLocalizedDescriptionKey: localizedDescription}];
                 
-                if (self.failureBlock) {
-                    self.failureBlock(error);
-                }
+                [self callFailureBlockWithError:error];
                 [self closeStream:stream];
             } else {
                 [(NSOutputStream *)stream write:[buffer bytes] maxLength:readBytes];
                 
                 self.bytesUnzipped += readBytes;
-                
-                if (self.progressBlock) {
-                    self.progressBlock(self.bytesUnzipped, self.totalBytes);
-                }
+                [self callProgressBlock];
             }
             
             break;
@@ -246,18 +258,14 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
             NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Failed to unzip the entry file."};
             NSError *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotUnzipEntryFile userInfo:userInfo];
             
-            if (self.failureBlock) {
-                self.failureBlock(error);
-            }
+            [self callFailureBlockWithError:error];
             [self closeStream:stream];
             
             break;
         }
         case NSStreamEventEndEncountered:
         {
-            if (self.successBlock) {
-                self.successBlock(self.unzipDestinationURL);
-            }
+            [self callSuccessBlock];
             [self closeStream:stream];
             
             break;
@@ -288,6 +296,35 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
     }
     
     return localizedDescription;
+}
+
+- (void)callSuccessBlock
+{
+    if (self.successBlock) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.successBlock(self.unzipDestinationURL);
+            [self releaseBlocks];
+        });
+    }
+}
+
+- (void)callFailureBlockWithError:(NSError *)error
+{
+    if (self.failureBlock) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.failureBlock(error);
+            [self releaseBlocks];
+        });
+    }
+}
+
+- (void)callProgressBlock
+{
+    if (self.progressBlock) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.progressBlock(self.bytesUnzipped, self.totalBytes);
+        });
+    }
 }
 
 @end
