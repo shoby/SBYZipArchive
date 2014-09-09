@@ -87,7 +87,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
     // end lock
     dispatch_semaphore_signal(self.semaphore);
     
-    if (error) {
+    if (error && unz_err < 0) {
         NSString *localizedDescription = [self localizedDescriptionForUnzError:unz_err];
         *error = [NSError errorWithDomain:SBYZipArchiveErrorDomain code:SBYZipArchiveErrorCannotGetFileInfo userInfo:@{NSLocalizedDescriptionKey: localizedDescription}];
         
