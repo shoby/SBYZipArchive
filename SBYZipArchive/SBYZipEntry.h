@@ -11,10 +11,10 @@
 @class SBYZipArchive;
 
 @interface SBYZipEntry : NSObject
-@property (weak, nonatomic, readonly)   SBYZipArchive *archive;
-@property (copy, nonatomic, readonly)   NSString  *fileName;
-@property (assign, nonatomic, readonly) NSUInteger fileSize;
-@property (assign, nonatomic, readonly) NSUInteger offset;
+@property (weak, nonatomic, readonly) SBYZipArchive *archive;
+@property (copy, nonatomic, readonly) NSString  *fileName;
+@property (nonatomic, readonly) NSUInteger fileSize;
+@property (nonatomic, readonly) NSUInteger offset;
 
 - (instancetype)initWithArchive:(SBYZipArchive *)archive
                        fileName:(NSString *)fileName

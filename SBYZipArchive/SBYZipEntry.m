@@ -10,10 +10,10 @@
 #import "SBYZipArchive.h"
 
 @interface SBYZipEntry ()
-@property (weak, nonatomic, readwrite)   SBYZipArchive *archive;
-@property (copy, nonatomic, readwrite)   NSString *fileName;
-@property (assign, nonatomic, readwrite) NSUInteger fileSize;
-@property (assign, nonatomic, readwrite) NSUInteger offset;
+@property (weak, nonatomic, readwrite) SBYZipArchive *archive;
+@property (copy, nonatomic, readwrite) NSString *fileName;
+@property (nonatomic, readwrite) NSUInteger fileSize;
+@property (nonatomic, readwrite) NSUInteger offset;
 @end
 
 @implementation SBYZipEntry
