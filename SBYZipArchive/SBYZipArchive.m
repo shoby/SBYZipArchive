@@ -301,9 +301,11 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 - (void)callSuccessBlock
 {
     if (self.successBlock) {
+        typeof(self.successBlock) successBlock = self.successBlock;
+        typeof(self.unzipDestinationURL) unzipDestinationURL = self.unzipDestinationURL;
+        [self releaseBlocks];
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.successBlock(self.unzipDestinationURL);
-            [self releaseBlocks];
+            successBlock(unzipDestinationURL);
         });
     }
 }
@@ -311,9 +313,10 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 - (void)callFailureBlockWithError:(NSError *)error
 {
     if (self.failureBlock) {
+        typeof(self.failureBlock) failureBlock = self.failureBlock;
+        [self releaseBlocks];
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.failureBlock(error);
-            [self releaseBlocks];
+            failureBlock(error);
         });
     }
 }
@@ -321,8 +324,11 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 - (void)callProgressBlock
 {
     if (self.progressBlock) {
+        typeof(self.progressBlock) progressBlock = self.progressBlock;
+        NSUInteger bytesUnzipped = self.bytesUnzipped;
+        NSUInteger totalBytes = self.totalBytes;
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.progressBlock(self.bytesUnzipped, self.totalBytes);
+            progressBlock(bytesUnzipped, totalBytes);
         });
     }
 }
