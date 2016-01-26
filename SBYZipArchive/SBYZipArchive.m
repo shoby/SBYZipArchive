@@ -14,17 +14,17 @@ NSString* const SBYZipArchiveErrorDomain = @"SBYZipArchiveErrorDomain";
 static const NSUInteger SBYZipArchiveBufferSize = 4096;
 
 @interface SBYZipArchive () <NSStreamDelegate>
-@property (strong, nonatomic, readwrite) NSURL *url;
-@property (assign, nonatomic) unzFile unzFile;
-@property (strong, nonatomic) NSMutableArray *cachedEntries;
+@property (nonatomic, readwrite) NSURL *url;
+@property (nonatomic) unzFile unzFile;
+@property (nonatomic) NSMutableArray<SBYZipEntry *> *cachedEntries;
 
-@property (strong, nonatomic) dispatch_semaphore_t semaphore;
+@property (nonatomic) dispatch_semaphore_t semaphore;
 
-@property (strong, nonatomic) NSOutputStream *outputStream;
-@property (strong, nonatomic) NSURL *unzipDestinationURL;
+@property (nonatomic) NSOutputStream *outputStream;
+@property (nonatomic) NSURL *unzipDestinationURL;
 
-@property (assign, nonatomic) NSUInteger bytesUnzipped;
-@property (assign, nonatomic) NSUInteger totalBytes;
+@property (nonatomic) NSUInteger bytesUnzipped;
+@property (nonatomic) NSUInteger totalBytes;
 
 @property (copy, nonatomic) void (^successBlock)(NSURL *);
 @property (copy, nonatomic) void (^failureBlock)(NSError *);
@@ -33,7 +33,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 
 @implementation SBYZipArchive
 
-- (id)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error
+- (instancetype)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error
 {
     self = [super init];
     if (self) {
@@ -133,7 +133,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
     return YES;
 }
 
-- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url success:(void (^)(NSURL *))success failure:(void (^)(NSError *))failure progress:(void (^)(NSUInteger, NSUInteger))progress
+- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url success:(nullable void (^)(NSURL *))success failure:(nullable void (^)(NSError *))failure progress:(nullable void (^)(NSUInteger, NSUInteger))progress
 {
     if (!entry) {
         return;

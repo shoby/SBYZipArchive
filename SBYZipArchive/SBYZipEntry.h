@@ -10,24 +10,28 @@
 
 @class SBYZipArchive;
 
-@interface SBYZipEntry : NSObject
-@property (weak, nonatomic, readonly)   SBYZipArchive *archive;
-@property (copy, nonatomic, readonly)   NSString  *fileName;
-@property (assign, nonatomic, readonly) NSUInteger fileSize;
-@property (assign, nonatomic, readonly) NSUInteger offset;
+NS_ASSUME_NONNULL_BEGIN
 
-- (id)initWithArchive:(SBYZipArchive *)archive
-             fileName:(NSString *)fileName
-             fileSize:(NSUInteger)fileSize
-               offset:(NSUInteger)offset;
+@interface SBYZipEntry : NSObject
+@property (weak, nonatomic, readonly) SBYZipArchive *archive;
+@property (copy, nonatomic, readonly) NSString *fileName;
+@property (nonatomic, readonly) NSUInteger fileSize;
+@property (nonatomic, readonly) NSUInteger offset;
+
+- (instancetype)initWithArchive:(SBYZipArchive *)archive
+                       fileName:(NSString *)fileName
+                       fileSize:(NSUInteger)fileSize
+                         offset:(NSUInteger)offset;
 
 // To unzip small file synchronously
 - (NSData *)dataWithError:(NSError *__autoreleasing *)error;
 
 // To unzip large file asynchronously
 - (void)unzipToURL:(NSURL *)url
-           success:(void (^)(NSURL *unzippedFileLocation))success
-           failure:(void (^)(NSError *error))failure
-          progress:(void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
+           success:(nullable void (^)(NSURL *unzippedFileLocation))success
+           failure:(nullable void (^)(NSError *error))failure
+          progress:(nullable void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
 
 @end
+
+NS_ASSUME_NONNULL_END

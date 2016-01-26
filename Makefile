@@ -1,7 +1,6 @@
-PROJECT = DemoApp/DemoApp.xcodeproj
-SCHEME = DemoApp
-TEST_SDK = iphonesimulator
-CONFIGURATION_DEBUG = Debug
+PROJECT = 'DemoApp/DemoApp.xcodeproj'
+SCHEME = 'DemoApp'
+DESTINATION = 'platform=iOS Simulator,name=iPhone 6s'
 
 clean:
 	xcodebuild \
@@ -12,6 +11,5 @@ test:
 	xcodebuild \
 		-project $(PROJECT) \
 		-scheme $(SCHEME) \
-		-sdk $(TEST_SDK) \
-		-configuration $(CONFIGURATION_DEBUG) \
+		-destination $(DESTINATION) \
 		build test
