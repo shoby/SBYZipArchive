@@ -33,7 +33,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 
 @implementation SBYZipArchive
 
-- (id)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error
+- (instancetype)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error
 {
     self = [super init];
     if (self) {

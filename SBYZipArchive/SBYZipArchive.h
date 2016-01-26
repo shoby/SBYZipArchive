@@ -15,7 +15,7 @@
 @property (strong, nonatomic, readonly) NSURL *url;
 @property (readonly) NSArray *entries;
 
-- (id)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error;
+- (instancetype)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error;
 
 - (BOOL)loadEntriesWithError:(NSError *__autoreleasing *)error;
 

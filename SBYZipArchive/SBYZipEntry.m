@@ -18,7 +18,7 @@
 
 @implementation SBYZipEntry
 
-- (id)initWithArchive:(SBYZipArchive *)archive
+- (instancetype)initWithArchive:(SBYZipArchive *)archive
              fileName:(NSString *)fileName
              fileSize:(NSUInteger)fileSize
                offset:(NSUInteger)offset

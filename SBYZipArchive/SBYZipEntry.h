@@ -16,10 +16,10 @@
 @property (assign, nonatomic, readonly) NSUInteger fileSize;
 @property (assign, nonatomic, readonly) NSUInteger offset;
 
-- (id)initWithArchive:(SBYZipArchive *)archive
-             fileName:(NSString *)fileName
-             fileSize:(NSUInteger)fileSize
-               offset:(NSUInteger)offset;
+- (instancetype)initWithArchive:(SBYZipArchive *)archive
+                       fileName:(NSString *)fileName
+                       fileSize:(NSUInteger)fileSize
+                         offset:(NSUInteger)offset;
 
 // To unzip small file synchronously
 - (NSData *)dataWithError:(NSError *__autoreleasing *)error;
