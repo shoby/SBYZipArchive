@@ -13,7 +13,7 @@
 
 @interface SBYZipArchive : NSObject
 @property (nonatomic, readonly) NSURL *url;
-@property (readonly) NSArray *entries;
+@property (readonly) NSArray<SBYZipEntry *> *entries;
 
 - (instancetype)initWithContentsOfURL:(NSURL *)url error:(NSError *__autoreleasing *)error;
 

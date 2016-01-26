@@ -16,7 +16,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
 @interface SBYZipArchive () <NSStreamDelegate>
 @property (nonatomic, readwrite) NSURL *url;
 @property (nonatomic) unzFile unzFile;
-@property (nonatomic) NSMutableArray *cachedEntries;
+@property (nonatomic) NSMutableArray<SBYZipEntry *> *cachedEntries;
 
 @property (nonatomic) dispatch_semaphore_t semaphore;
 
