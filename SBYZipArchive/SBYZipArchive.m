@@ -133,7 +133,7 @@ static const NSUInteger SBYZipArchiveBufferSize = 4096;
     return YES;
 }
 
-- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url success:(void (^)(NSURL *))success failure:(void (^)(NSError *))failure progress:(void (^)(NSUInteger, NSUInteger))progress
+- (void)unzipEntry:(SBYZipEntry *)entry toURL:(NSURL *)url success:(nullable void (^)(NSURL *))success failure:(nullable void (^)(NSError *))failure progress:(nullable void (^)(NSUInteger, NSUInteger))progress
 {
     if (!entry) {
         return;

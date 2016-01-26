@@ -38,7 +38,7 @@
     return [self.archive dataForEntry:self error:error];
 }
 
-- (void)unzipToURL:(NSURL *)url success:(void (^)(NSURL *))success failure:(void (^)(NSError *))failure progress:(void (^)(NSUInteger, NSUInteger))progress
+- (void)unzipToURL:(NSURL *)url success:(nullable void (^)(NSURL *))success failure:(nullable void (^)(NSError *))failure progress:(nullable void (^)(NSUInteger, NSUInteger))progress
 {
     [self.archive unzipEntry:self toURL:url success:success failure:failure progress:progress];
 }

@@ -11,6 +11,8 @@
 
 @protocol SBYZipArchiveDelegate;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SBYZipArchive : NSObject
 @property (nonatomic, readonly) NSURL *url;
 @property (readonly) NSArray<SBYZipEntry *> *entries;
@@ -23,11 +25,10 @@
 
 - (void)unzipEntry:(SBYZipEntry *)entry
              toURL:(NSURL *)url
-           success:(void (^)(NSURL *unzippedFileLocation))success
-           failure:(void (^)(NSError *error))failure
-          progress:(void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
+           success:(nullable void (^)(NSURL *unzippedFileLocation))success
+           failure:(nullable void (^)(NSError *error))failure
+          progress:(nullable void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
 @end
-
 
 extern NSString* const SBYZipArchiveErrorDomain;
 
@@ -37,3 +38,5 @@ typedef NS_ENUM(NSInteger, SBYZipArchiveError)
     SBYZipArchiveErrorCannotGetFileInfo = 2,
     SBYZipArchiveErrorCannotUnzipEntryFile = 3,
 };
+
+NS_ASSUME_NONNULL_END

@@ -10,6 +10,8 @@
 
 @class SBYZipArchive;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SBYZipEntry : NSObject
 @property (weak, nonatomic, readonly) SBYZipArchive *archive;
 @property (copy, nonatomic, readonly) NSString *fileName;
@@ -26,8 +28,10 @@
 
 // To unzip large file asynchronously
 - (void)unzipToURL:(NSURL *)url
-           success:(void (^)(NSURL *unzippedFileLocation))success
-           failure:(void (^)(NSError *error))failure
-          progress:(void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
+           success:(nullable void (^)(NSURL *unzippedFileLocation))success
+           failure:(nullable void (^)(NSError *error))failure
+          progress:(nullable void (^)(NSUInteger bytesUnzipped, NSUInteger totalBytes))progress;
 
 @end
+
+NS_ASSUME_NONNULL_END
