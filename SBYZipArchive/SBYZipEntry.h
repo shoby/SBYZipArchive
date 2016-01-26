@@ -12,7 +12,7 @@
 
 @interface SBYZipEntry : NSObject
 @property (weak, nonatomic, readonly) SBYZipArchive *archive;
-@property (copy, nonatomic, readonly) NSString  *fileName;
+@property (copy, nonatomic, readonly) NSString *fileName;
 @property (nonatomic, readonly) NSUInteger fileSize;
 @property (nonatomic, readonly) NSUInteger offset;
 

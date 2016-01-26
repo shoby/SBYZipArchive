@@ -25,10 +25,10 @@
 {
     self = [super init];
     if (self) {
-        self.archive            = archive;
-        self.fileName           = fileName;
-        self.fileSize           = fileSize;
-        self.offset             = offset;
+        self.archive  = archive;
+        self.fileName = fileName;
+        self.fileSize = fileSize;
+        self.offset   = offset;
     }
     return self;
 }
