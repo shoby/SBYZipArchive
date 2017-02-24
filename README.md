@@ -1,5 +1,5 @@
 # SBYZipArchive
-[![Build Status](https://travis-ci.org/shoby/SBYZipArchive.svg?branch=master)](https://travis-ci.org/shoby/SBYZipArchive)
+[![Build Status](https://www.bitrise.io/app/af1fb2e9e05a07d1.svg?token=m6GBwoMNyyRo18NPmfiAug&branch=master)](https://www.bitrise.io/app/af1fb2e9e05a07d1)
 
 SBYZipArchive is a simple unzip library to extract files from a large archive.
 You can extract contents without expanding the whole archive.
